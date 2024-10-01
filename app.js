@@ -15,7 +15,11 @@ async function sendMessage() {
     if (userMessage.toLowerCase().startsWith("image")) {
         const imageDescription = userMessage.slice(6);  // Get the description after "image"
         const imageUrl = await getImageFromDescription(imageDescription);
-        displayImage(imageUrl);
+        if (imageUrl) {
+            displayImage(imageUrl);
+        } else {
+            addMessageToChat('bot-message', 'Something went wrong with image generation.');
+        }
     } else {
         const chatReply = await getChatReply(userMessage);
         addMessageToChat('bot-message', chatReply);
@@ -25,9 +29,12 @@ async function sendMessage() {
 // Function to get a response from one of the chat APIs
 async function getChatReply(message) {
     try {
-        // Using BrainShop API for general chatbot queries
+        console.log("Sending message to BrainShop:", message);
         const response = await fetch(`http://api.brainshop.ai/get?bid=177607&key=NwzhALqeO1kubFVD&uid=[uid]&msg=${encodeURIComponent(message)}`);
+        console.log("Response from BrainShop:", response);
+        
         const data = await response.json();
+        console.log("Data from BrainShop:", data);
         return data.cnt;
     } catch (error) {
         console.error('Error communicating with BrainShop:', error);
@@ -38,10 +45,13 @@ async function getChatReply(message) {
 // Function to generate an image from text using the image API
 async function getImageFromDescription(description) {
     try {
-        // Using your custom image API
+        console.log("Generating image for:", description);
         const response = await fetch(`http://api.maher-zubair.tech/ai/photoleap?q=${encodeURIComponent(description)}`);
-        const data = await response.json();
+        console.log("Response from Image API:", response);
         
+        const data = await response.json();
+        console.log("Data from Image API:", data);
+
         if (data.status === 200) {
             return data.result;
         } else {
